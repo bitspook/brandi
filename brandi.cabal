@@ -1,0 +1,56 @@
+cabal-version: 1.12
+
+name:           brandi
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/channikhabra/brandi#readme>
+author:         Charanjit Singh
+maintainer:     charanjit.singh@trantorinc.com
+copyright:      2020 Charanjit Singh
+license:        AGPL-3
+build-type:     Simple
+extra-source-files:
+    README.org
+
+library
+  other-modules:
+      Paths_brandi
+  exposed-modules:
+      Brandi
+  hs-source-dirs:
+      src
+  default-extensions: NoImplicitPrelude
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base
+    , hakyll
+    , rio
+  default-language: Haskell2010
+
+executable brandi
+  main-is: Main.hs
+  other-modules:
+      Paths_brandi
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base
+    , hakyll
+    , rio
+    , brandi
+  default-language: Haskell2010
+
+test-suite brandi-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_brandi
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base
+    , hakyll
+    , hot-core
+    , rio
+  default-language: Haskell2010
