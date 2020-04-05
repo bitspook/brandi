@@ -24,6 +24,11 @@ library
       base
     , hakyll
     , rio
+    , dhall
+    , text
+    , hakyll-sass
+    , hsass
+    , hakyll-images
   default-language: Haskell2010
 
 executable brandi
@@ -35,7 +40,6 @@ executable brandi
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base
-    , hakyll
     , rio
     , brandi
   default-language: Haskell2010

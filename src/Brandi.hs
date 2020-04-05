@@ -1,67 +1,117 @@
-{-# LANGUAGE OverloadedStrings #-}
-module Brandi where
+{-# LANGUAGE DeriveGeneric       #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+module Brandi
+        ( run
+        )
+where
 --------------------------------------------------------------------------------
-import           Data.Monoid (mappend)
+import           Data.Monoid       ((<>))
+import           Data.Text         (unpack)
+import           Dhall             (Interpret, auto, input)
 import           Hakyll
-import           RIO
+import           Hakyll.Images     (compressJpgCompiler, loadImage)
+import           Hakyll.Web.Sass   (sassCompilerWith)
+import           RIO               hiding (handle)
+import           Text.Sass.Options (SassOptions (..), SassOutputStyle (..),
+                                    defaultSassOptions)
 --------------------------------------------------------------------------------
-run :: IO ()
-run = hakyll $ do
-    match "images/*" $ do
-        route   idRoute
-        compile copyFileCompiler
 
-    match "css/*" $ do
-        route   idRoute
-        compile compressCssCompiler
+type URL = Text
 
-    match (fromList ["about.rst", "contact.markdown"]) $ do
-        route   $ setExtension "html"
-        compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/default.html" defaultContext
-            >>= relativizeUrls
+data BlogConfig = BlogConfig
+  { name          :: Text
+  , handle        :: Text
+  , avatar        :: URL
+  , github        :: URL
+  , linkedin      :: URL
+  , stackoverflow :: URL
+  , gpgPublicQr   :: URL
+  , resume        :: URL
+  } deriving (Generic, Show)
 
-    match "posts/*" $ do
-        route $ setExtension "html"
-        compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/post.html"    postCtx
-            >>= loadAndApplyTemplate "templates/default.html" postCtx
-            >>= relativizeUrls
-
-    create ["archive.html"] $ do
-        route idRoute
-        compile $ do
-            posts <- recentFirst =<< loadAll "posts/*"
-            let archiveCtx =
-                    listField "posts" postCtx (return posts) `mappend`
-                    constField "title" "Archives"            `mappend`
-                    defaultContext
-
-            makeItem ""
-                >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
-                >>= loadAndApplyTemplate "templates/default.html" archiveCtx
-                >>= relativizeUrls
+instance Interpret BlogConfig
 
 
-    match "index.html" $ do
-        route idRoute
-        compile $ do
-            posts <- recentFirst =<< loadAll "posts/*"
-            let indexCtx =
-                    listField "posts" postCtx (return posts) `mappend`
-                    constField "title" "Home"                `mappend`
-                    defaultContext
+config :: Configuration
+config = defaultConfiguration { destinationDirectory = "build/site"
+                              , storeDirectory       = "build/_store"
+                              , tmpDirectory         = "build/_tmp"
+                              }
 
-            getResourceBody
-                >>= applyAsTemplate indexCtx
-                >>= loadAndApplyTemplate "templates/default.html" indexCtx
-                >>= relativizeUrls
+sassOptions :: SassOptions
+sassOptions = defaultSassOptions
+              { sassSourceMapEmbed = True
+    , sassOutputStyle    = SassStyleCompressed
+    }
 
-    match "templates/*" $ compile templateBodyCompiler
+blogConfigCtx :: BlogConfig -> Context String
+blogConfigCtx conf =
+  pickAs "github" github
+  <> pickAs "name"          name
+  <> pickAs "handle"        handle
+  <> pickAs "linkedin"      linkedin
+  <> pickAs "stackoverflow" stackoverflow
+  <> pickAs "avatar"        avatar
+  <> pickAs "gpgPublicQr"   gpgPublicQr
+  <> pickAs "resume"        resume
+  <> defaultContext
+  where
+    pick a = unpack . a $ conf
+    pickAs s a = constField s (pick a)
 
+postsGlob :: Pattern
+postsGlob = "content/**.md"
 
---------------------------------------------------------------------------------
+jpgsGlob :: Pattern
+jpgsGlob = "images/**.jpg"
+
 postCtx :: Context String
-postCtx =
-    dateField "date" "%B %e, %Y" `mappend`
-    defaultContext
+postCtx =  dateField "date" "%B %e, %Y"
+        <> constField "item-type" "post"
+        <> pathField "sourcefile"
+        <> defaultContext
+
+run :: IO ()
+run = do
+  blogConf :: BlogConfig <- input auto "./config.dhall"
+
+  hakyllWith config $ do
+    -- compress images
+    match jpgsGlob $ do
+      route idRoute
+      compile $ loadImage
+        >>= compressJpgCompiler 50
+
+    -- copy assets (non images and non post files)
+    match ("content/**" .&&. complement postsGlob .&&. complement jpgsGlob) $ do
+      route idRoute
+      compile copyFileCompiler
+
+    match ("assets/**" .&&. complement jpgsGlob .&&. complement "assets/css/**") $ do
+      route idRoute
+      compile copyFileCompiler
+
+    -- compile SASS/CSS
+    depends <- makePatternDependency "assets/css/**.scss"
+    rulesExtraDependencies [depends] $ do
+      let sassCompiler = sassCompilerWith sassOptions
+      match (fromRegex "^assets/css/[^_].*.scss") $ do
+        route $ setExtension "css"
+        compile sassCompiler
+
+    -- Create index.html
+    match "index.html" $ do
+      route idRoute
+      compile $ do
+        posts <- recentFirst =<< loadAll postsGlob
+        let indexCtx = listField "posts" postCtx (return posts)
+              <> constField "title" "Home"
+              <> blogConfigCtx blogConf
+              <> defaultContext
+
+        getResourceBody
+            >>= applyAsTemplate indexCtx
+            >>= relativizeUrls
+
+--------------------------------------------------------------------------------
