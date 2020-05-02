@@ -7,13 +7,14 @@ module Brandi
 where
 --------------------------------------------------------------------------------
 import           Data.Monoid       ((<>))
+import           Data.String
 import           Data.Text         (unpack)
 import           Dhall             (Interpret, auto, input)
 import           Hakyll
 import           Hakyll.Images     (compressJpgCompiler, loadImage)
 import           Hakyll.Web.Sass   (sassCompilerWith)
 import           RIO               hiding (handle)
-import           RIO.List          (headMaybe)
+import           RIO.List          (headMaybe, isSuffixOf)
 import           System.FilePath   (combine, dropExtension, joinPath,
                                     splitDirectories)
 import           Text.Sass.Options (SassOptions (..), SassOutputStyle (..),
@@ -41,19 +42,29 @@ createTagsPages tags baseCtx = tagsRules tags $
       let tagsCtx =
             constField "title" title
             <> listField "posts" baseCtx (return posts)
-            <> constField "tag" tag
             <> baseCtx
 
       makeItem ""
-        >>= loadAndApplyTemplate "templates/tag.html" tagsCtx
+        >>= loadAndApplyTemplate "templates/archive.html" (tagsCtx <> tagsField "tags" tags)
+        >>= loadAndApplyTemplate "templates/main-layout.html" tagsCtx
         >>= loadAndApplyTemplate "templates/default.html" tagsCtx
         >>= relativizeUrls
+        >>= cleanIndexUrls
 
 getL1Category :: Identifier -> String
 getL1Category = fromMaybe "uncategorized" . headMaybe . drop 1 . splitDirectories . dropExtension . toFilePath
 
 getL1Category' :: MonadMetadata m => Identifier -> m [String]
 getL1Category' = return . return . getL1Category
+
+cleanIndexUrls :: Item String -> Compiler (Item String)
+cleanIndexUrls = return . fmap (withUrls cleanIndex)
+  where
+    cleanIndex :: String -> String
+    cleanIndex url
+      | idx `isSuffixOf` url = take (length url - length idx) url
+      | otherwise            = url
+      where idx = "index.html"
 
 --------------------------------------------------------------------------------
 
@@ -117,6 +128,7 @@ postCtx' conf categories tags =  dateField "date" "%B %e, %Y"
         <> blogConfigCtx conf
         <> defaultContext
 
+---
 
 run :: IO ()
 run = do
@@ -161,12 +173,30 @@ run = do
       compile $
         pandocCompiler
         >>= loadAndApplyTemplate "templates/post.html" ctx
+        >>= loadAndApplyTemplate "templates/main-layout.html" ctx
         >>= loadAndApplyTemplate "templates/default.html" ctx
         >>= relativizeUrls
+        >>= cleanIndexUrls
 
     -- assemble tag and category pages
     createTagsPages tags postCtx
     createTagsPages categories postCtx
+
+    -- create an archive page
+    create ["archive/index.html"] $ do
+      route idRoute
+      compile $ do
+        posts <- recentFirst =<< loadAll contentGlob
+        let archiveCtx = listField "posts" postCtx (return posts)
+                         <> constField "title" "Archive"
+                         <> constField "category" "archive"
+                         <> postCtx
+
+        makeItem ""
+          >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
+          >>= loadAndApplyTemplate "templates/main-layout.html" archiveCtx
+          >>= loadAndApplyTemplate "templates/default.html" archiveCtx
+          >>= relativizeUrls
 
     -- Create index.html
     match "index.html" $ do
@@ -182,3 +212,4 @@ run = do
             >>= applyAsTemplate indexCtx
             >>= loadAndApplyTemplate "templates/default.html" indexCtx
             >>= relativizeUrls
+            >>= cleanIndexUrls
