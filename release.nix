@@ -32,22 +32,8 @@ in
       brandi
     ];
     buildInputs = with haskellPackages; [
-      ghcid
-      hlint
       brandi
     ];
     withHoogle = true;
-  };
-
-  dockerImage = pkgs.dockerTools.buildImage {
-    name = "brandi";
-    tag = "latest";
-
-    fromImageName = "alpine";
-    fromImageTag = "latest";
-
-    config = {
-      Cmd = [ "${project}/bin/brandi" ];
-    };
   };
 }
