@@ -36,4 +36,17 @@ in
     ];
     withHoogle = true;
   };
+
+  dockerImage = pkgs.dockerTools.buildImage {
+    name = "channikhabra/brandi";
+    tag = "latest";
+
+    config = {
+      Cmd = [ "${project}/bin/brandi" "build" ];
+      WorkingDir = "/app";
+      Volumes = {
+        "/app" = {};
+      };
+    };
+  };
 }
