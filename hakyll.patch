@@ -1,0 +1,32 @@
+diff --git a/hakyll.cabal b/hakyll.cabal
+index 4be61bc..92a6311 100644
+--- a/hakyll.cabal
++++ b/hakyll.cabal
+@@ -174,7 +174,7 @@ Library
+     data-default         >= 0.4      && < 0.8,
+     deepseq              >= 1.3      && < 1.5,
+     directory            >= 1.0      && < 1.4,
+-    file-embed           >= 0.0.10.1 && < 0.0.12,
++    file-embed,
+     filepath             >= 1.0      && < 1.5,
+     lrucache             >= 1.1.1    && < 1.3,
+     memory               >= 0.14.18  && < 0.16,
+diff --git a/lib/Hakyll/Web/Tags.hs b/lib/Hakyll/Web/Tags.hs
+index aab5d34..5035f48 100644
+--- a/lib/Hakyll/Web/Tags.hs
++++ b/lib/Hakyll/Web/Tags.hs
+@@ -139,7 +139,13 @@ buildTagsWith f pattern makeId = do
+ 
+ 
+ --------------------------------------------------------------------------------
+-buildTags :: MonadMetadata m => Pattern -> (String -> Identifier) -> m Tags
++-- | Build 'Tags' belonging to a 'Pattern' using the default strategy
++buildTags :: MonadMetadata m =>
++  Pattern
++  -- ^ Find tags in all files matched by Pattern
++  -> (String -> Identifier)
++  -- ^ Convert each tag to an identifier. e.g using 'fromCapture'
++  -> m Tags
+ buildTags = buildTagsWith getTags
+ 
+ 

@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric       #-}
+{-# LANGUAGE NoImplicitPrelude   #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Brandi
@@ -9,7 +10,7 @@ where
 import           Data.Monoid       ((<>))
 import           Data.String
 import           Data.Text         (unpack)
-import           Dhall             (Interpret, auto, input)
+import           Dhall             (FromDhall, auto, input)
 import           Hakyll
 import           Hakyll.Images     (compressJpgCompiler, loadImage)
 import           Hakyll.Web.Sass   (sassCompilerWith)
@@ -82,8 +83,7 @@ data BlogConfig = BlogConfig
   , homeTitle     :: Text
   } deriving (Generic, Show)
 
-instance Interpret BlogConfig
-
+instance FromDhall BlogConfig
 
 config :: Configuration
 config = defaultConfiguration
