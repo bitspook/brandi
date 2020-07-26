@@ -11,6 +11,7 @@ import           Data.Monoid       ((<>))
 import           Data.String
 import           Data.Text         (unpack)
 import           Dhall             (FromDhall, auto, input)
+import qualified GHC.IO.Encoding   as E
 import           Hakyll
 import           Hakyll.Images     (compressJpgCompiler, loadImage)
 import           Hakyll.Web.Sass   (sassCompilerWith)
@@ -132,6 +133,8 @@ postCtx' conf categories tags =  dateField "date" "%B %e, %Y"
 
 run :: IO ()
 run = do
+  E.setLocaleEncoding E.utf8
+
   blogConf :: BlogConfig <- input auto "./config.dhall"
 
   hakyllWith config $ do
