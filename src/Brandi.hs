@@ -161,6 +161,10 @@ run = do
       route idRoute
       compile copyFileCompiler
 
+    match ("CNAME") $ do
+      route idRoute
+      compile copyFileCompiler
+
     -- compile SASS/CSS
     depends <- makePatternDependency "assets/css/**.scss"
     rulesExtraDependencies [depends] $ do
