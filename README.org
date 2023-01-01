@@ -1,0 +1,37 @@
+* Brand I
+
+BrandI manages my online presence as if I was a brand.
+
+That constitutes helping me with:
+
+1. Public perception
+
+   - Presenting myself in a way which highlights the qualities I want to
+     showcase
+   - Managing the exposure-surface
+     - Provide awareness of different websites where I expose myself to public
+       view
+     - Manage what kind of content I am associating myself with through
+       different online platforms
+
+2. Market research
+
+   Staying updated with where rest of the world is going
+
+   - Following people on the internet
+   - Maintaining an evolving reading-list, and actually reading it
+
+3. Self awareness
+
+   - Identifying the aspects I want to grow
+   - Keeping track of the progress I make
+
+This mostly boils down to having an application which:
+
+1. Is an RSS reader to follow blogs, social media and other content I want to
+   follow (like Github activity)
+2. Is a dashboard of my personal goals
+3. Is a "Profile editor" which allow me to see and change my "profile" on
+   different online platforms from a single place
+
+Or that's what I think it is going to be. Let's see where it goes :-)
