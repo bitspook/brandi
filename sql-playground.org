@@ -1,0 +1,13 @@
+#+name: smoke-test
+#+begin_src sqlite :db ./brandi.db
+  SELECT count(*) FROM github_events;
+  PRAGMA table_info(github_events);
+#+end_src
+
+#+RESULTS: smoke-test
+| 60 |            |      |   |                   |   |
+|  0 | id         | TEXT | 1 |                   | 1 |
+|  1 | type       | TEXT | 1 |                   | 0 |
+|  2 | payload    | TEXT | 1 |                   | 0 |
+|  3 | created_at | TEXT | 1 | current_timestamp | 0 |
+|  4 | updated_at | TEXT | 1 | current_timestamp | 0 |
