@@ -14,11 +14,27 @@
                    (payload event-payload)) ev
     (multiple-value-bind (stmt vals)
         (sxql:yield (sxql:insert-into :github_events
-                      (sxql:set= :id id
-                                 :type type
-                                 :payload payload)))
-      (log:d "Insert Query: ~a" stmt)
+                      (sxql:set=
+                       :id id
+                       :type type
+                       :payload (yason:with-output-to-string* ()
+                                  (yason:encode payload)))))
+      (log:d "Inserting github-event: ~a [~a]" stmt vals)
       (dbi:execute (dbi:prepare (make-connection) stmt) vals))))
+
+(defmacro query-gh-events (&rest q-frags)
+  (labels ((to-gh-event (row)
+             (mk-gh-event (getf row :|id|)
+                          (getf row :|type|)
+                          (yason:parse (getf row :|payload|)))))
+    `(multiple-value-bind (stmt vals)
+         (sxql:yield
+          (sxql:select (:id :type :payload)
+            (sxql:from :github_events) ,@q-frags))
+       (log:d "Executing SQL: ~a ~%[With vals: ~a]" stmt vals)
+       (let* ((conn (make-connection))
+              (query (dbi:execute (dbi:prepare conn stmt) vals)))
+         (mapcar ,(function to-gh-event) (dbi:fetch-all query))))))
 
 (defun mk-gh-event (id type payload)
   (make-instance
@@ -43,5 +59,4 @@
           :do (db-insert (mk-gh-event
                           (gethash "id" event)
                           (gethash "type" event)
-                          (yason:with-output-to-string* ()
-                            (yason:encode event)))))))
+                          (gethash "payload" event))))))

@@ -12,6 +12,7 @@
 
 (defvar *server* nil)
 (defun start ()
+  (run-pending-migrations)
   (setf *server*
         (clack:clackup
          *app*
@@ -19,4 +20,5 @@
          :port 8000)))
 
 (defun stop ()
-  (clack:stop *server*))
+  (clack:stop *server*)
+  (dbi:disconnect (make-connection)))
