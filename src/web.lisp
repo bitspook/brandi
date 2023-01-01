@@ -1,7 +1,11 @@
 (in-package #:brandi)
 
 (defun handler (env)
-  '(200 (:content-type "application/json") ("[\"lol\"]")))
+  (declare (ignore env))
+  (let* ((gh-events (query-gh-events (sxql:limit 1)))
+         (res-body (with-output-to-string (str)
+                     (yason:encode gh-events str))))
+    `(200 (:content-type "application/json") (,res-body))))
 
 (defparameter *app* (lambda (env) (funcall #'handler env)))
 
@@ -10,15 +14,15 @@
       (lack:builder
        *app*))
 
-(defvar *server* nil)
-(defun start ()
+(defvar *web-server* nil)
+(defun start-web ()
   (run-pending-migrations)
-  (setf *server*
+  (setf *web-server*
         (clack:clackup
          *app*
          :server :woo
          :port 8000)))
 
-(defun stop ()
-  (clack:stop *server*)
-  (dbi:disconnect (make-connection)))
+(defun stop-web ()
+  (clack:stop *web-server*)
+  (db-disconnect))

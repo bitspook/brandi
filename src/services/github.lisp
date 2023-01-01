@@ -19,22 +19,41 @@
                        :type type
                        :payload (yason:with-output-to-string* ()
                                   (yason:encode payload)))))
-      (log:d "Inserting github-event: ~a [~a]" stmt vals)
-      (dbi:execute (dbi:prepare (make-connection) stmt) vals))))
+      (log:d "Inserting github-event: ~a" stmt)
+      (dbi:execute (dbi:prepare (db-connect) stmt) vals))))
+
+(defun db-clear-gh-events ()
+  "Delete all github-events from database."
+  (dbi:execute
+   (dbi:prepare
+    (db-connect)
+    (sxql:yield (sxql:delete-from :github_events)))))
+
+(defmethod yason:encode ((event github-event) &optional stream)
+  (with-accessors ((id event-id)
+                   (type event-type)
+                   (payload event-payload)) event
+    (let ((yason:*symbol-key-encoder* #'yason:encode-symbol-as-lowercase))
+      (yason:encode-alist
+       `((id . ,id)
+         (type . ,type)
+         (payload . ,payload))
+       stream))))
+
+(defun db-to-gh-event (row)
+  (mk-gh-event (getf row :|id|)
+               (getf row :|type|)
+               (yason:parse (getf row :|payload|))))
 
 (defmacro query-gh-events (&rest q-frags)
-  (labels ((to-gh-event (row)
-             (mk-gh-event (getf row :|id|)
-                          (getf row :|type|)
-                          (yason:parse (getf row :|payload|)))))
-    `(multiple-value-bind (stmt vals)
-         (sxql:yield
-          (sxql:select (:id :type :payload)
-            (sxql:from :github_events) ,@q-frags))
-       (log:d "Executing SQL: ~a ~%[With vals: ~a]" stmt vals)
-       (let* ((conn (make-connection))
-              (query (dbi:execute (dbi:prepare conn stmt) vals)))
-         (mapcar ,(function to-gh-event) (dbi:fetch-all query))))))
+  `(multiple-value-bind (stmt vals)
+       (sxql:yield
+        (sxql:select (:id :type :payload)
+          (sxql:from :github_events) ,@q-frags))
+     (log:d "Executing SQL: ~a ~%[With vals: ~a]" stmt vals)
+     (let* ((conn (db-connect))
+            (query (dbi:execute (dbi:prepare conn stmt) vals)))
+       (mapcar #'db-to-gh-event (dbi:fetch-all query)))))
 
 (defun mk-gh-event (id type payload)
   (make-instance
@@ -55,6 +74,9 @@
                                      "gh api /users/~a/received_events"
                                      username)
                              :output str)))))
+    ;; FIXME This is a hack. Ideally we should overwrite existing events on
+    ;; event-id unique constraint conflict
+    (db-clear-gh-events)
     (loop :for event :in (concatenate 'list events received-events)
           :do (db-insert (mk-gh-event
                           (gethash "id" event)

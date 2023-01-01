@@ -4,7 +4,7 @@
 (in-package :brandi)
 
 (run-pending-migrations)
-
 (refresh-github-activity "bitspook")
 
-(query-gh-events (sxql:limit 10))
+(start-web)
+(stop-web)

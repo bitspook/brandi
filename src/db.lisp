@@ -1,7 +1,7 @@
 (in-package :brandi)
 
 (defparameter *conn* nil
-  "The database connection. Should not be used directly, use `make-connection'
+  "The database connection. Should not be used directly, use `db-connect'
 instead.")
 
 (defparameter *migration-driver* nil
@@ -19,12 +19,12 @@ instead.")
     (setq *migratum-provider* (migratum.provider.local-path:make-provider migrations-dirs))
     (migratum:provider-init *migratum-provider*)
 
-    (setq *migration-driver* (migratum.driver.dbi:make-driver *migratum-provider* (make-connection)))
+    (setq *migration-driver* (migratum.driver.dbi:make-driver *migratum-provider* (db-connect)))
     (migratum:driver-init *migration-driver*)
     *migration-driver*))
 
-(defun make-connection ()
-  (when *conn* (return-from make-connection *conn*))
+(defun db-connect ()
+  (when *conn* (return-from db-connect *conn*))
 
   (setq *conn* (dbi:connect :sqlite3 :database-name (conf :db-name)))
   ;; WAL PRAGMA cannot be set using migrations, because migrations are ran
@@ -32,6 +32,10 @@ instead.")
   ;; transaction
   (dbi:execute (dbi:prepare *conn* "PRAGMA journal_mode=WAL;"))
   *conn*)
+
+(defun db-disconnect ()
+  (dbi:disconnect *conn*)
+  (setf *conn* nil))
 
 (defun run-pending-migrations ()
   (migratum:apply-pending (prep-migrations)))

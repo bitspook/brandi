@@ -19,8 +19,8 @@
                 :components
                 ((:file "package")
                  (:file "db")
-                 (:file "web")
-                 (:file "services/github"))))
+                 (:file "services/github")
+                 (:file "web"))))
   :description "BrandI manages my online presence as if I was a brand."
   :in-order-to ((test-op (test-op "brandi/tests"))))
 
