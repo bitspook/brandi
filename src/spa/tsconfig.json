@@ -1,0 +1,15 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "jsx": "preserve",
+    "experimentalDecorators": true,
+    "jsxImportSource": "react",
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "lib": ["ES2015", "DOM"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
