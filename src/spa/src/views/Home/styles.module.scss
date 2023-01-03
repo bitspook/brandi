@@ -48,9 +48,30 @@ body {
 }
 
 .event {
-  border: 1px solid var(--border-color);
   width: 100%;
-  padding: 1rem 2rem;
+  max-width: 60rem;
+  margin-bottom: 2rem;
+}
+
+.eventTitle {
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+
+  .avatar {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background: var(--border-color);
+    margin-right: 1rem;
+  }
+}
+
+.eventBody {
+  border: 1px solid var(--border-color);
+  padding: 1rem;
   border-radius: 4px;
   box-shadow: 0 0 0.5rem var(--border-color);
+  margin-left: 3rem;
 }

@@ -5,3 +5,4 @@ export const feed: string;
 export const event: string;
 export const eventTitle: string;
 export const eventBody: string;
+export const avatar: string;

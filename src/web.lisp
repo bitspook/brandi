@@ -2,7 +2,7 @@
 
 (defun handler (env)
   (declare (ignore env))
-  (let* ((gh-events (query-gh-events (sxql:limit 1)))
+  (let* ((gh-events (query-gh-events (sxql:limit 50)))
          (res-body (with-output-to-string (str)
                      (yason:encode gh-events str))))
     `(200 (:content-type "application/json") (,res-body))))

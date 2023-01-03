@@ -6,8 +6,6 @@ export default () => {
   const events = useStore((state) => state.github.events);
   const fetchEvents = useStore((s) => s.fetchGithubEvents);
 
-  console.log('EVENTS', events);
-
   useEffect(() => {
     fetchEvents();
   }, []);
@@ -19,14 +17,21 @@ export default () => {
       </nav>
       <div className={styles.container}>
         <div className={styles.feed}>
-          <section className={styles.event}>
-            <header className={styles.eventTitle}>
-              @klnegi pushed to ullu
-            </header>
-            <article className={styles.eventBody}>
-              Some really awesome code.
-            </article>
-          </section>
+          {events.map((event) => (
+            <section key={event.id} className={styles.event}>
+              <header className={styles.eventTitle}>
+                <img className={styles.avatar} src={event.actor.avatar_url} />
+                <a href={event.actor.url}>@{event.actor.display_login}</a>
+                &nbsp;
+                {event.payload.action} to &nbsp;
+                <a href={event.repo.url}>{event.repo.name}</a>
+                &nbsp; on {event.created_at}
+              </header>
+              <article className={styles.eventBody}>
+                Some really awesome code.
+              </article>
+            </section>
+          ))}
         </div>
       </div>
     </div>

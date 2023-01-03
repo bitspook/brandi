@@ -18,7 +18,8 @@
                        :id id
                        :type type
                        :payload (yason:with-output-to-string* ()
-                                  (yason:encode payload)))))
+                                  (yason:encode payload))
+                       :created_at (gethash "created_at" payload))))
       (log:d "Inserting github-event: ~a" stmt)
       (dbi:execute (dbi:prepare (db-connect) stmt) vals))))
 
@@ -49,7 +50,9 @@
   `(multiple-value-bind (stmt vals)
        (sxql:yield
         (sxql:select (:id :type :payload)
-          (sxql:from :github_events) ,@q-frags))
+          (sxql:from :github_events)
+          (sxql:order-by (:desc :created_at))
+          ,@q-frags))
      (log:d "Executing SQL: ~a ~%[With vals: ~a]" stmt vals)
      (let* ((conn (db-connect))
             (query (dbi:execute (dbi:prepare conn stmt) vals)))
@@ -81,4 +84,4 @@
           :do (db-insert (mk-gh-event
                           (gethash "id" event)
                           (gethash "type" event)
-                          (gethash "payload" event))))))
+                          event)))))

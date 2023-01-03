@@ -11,3 +11,15 @@
 |  2 | payload    | TEXT | 1 |                   | 0 |
 |  3 | created_at | TEXT | 1 | current_timestamp | 0 |
 |  4 | updated_at | TEXT | 1 | current_timestamp | 0 |
+
+#+name: latest-events
+#+begin_src sqlite :db ./brandi.db
+  SELECT id, type, created_at FROM github_events ORDER BY created_at DESC LIMIT 5;
+#+end_src
+
+#+RESULTS: latest-events
+| 26190029518 | DeleteEvent      | 2023-01-03T08:00:38Z |
+| 26190029107 | PullRequestEvent | 2023-01-03T08:00:36Z |
+| 26190028411 | PullRequestEvent | 2023-01-03T08:00:34Z |
+| 26190028154 | CreateEvent      | 2023-01-03T08:00:33Z |
+| 26190004520 | PushEvent        | 2023-01-03T07:58:56Z |
