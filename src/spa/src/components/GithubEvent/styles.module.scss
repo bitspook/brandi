@@ -2,11 +2,19 @@
   width: 100%;
   max-width: 60rem;
   margin-bottom: 2rem;
-  display: flex;
   align-items: center;
+
+  header {
+    display: flex;
+    align-items: center;
+  }
 }
 
 .eventTitle {
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+
   a {
     text-decoration: none;
     font-weight: bold;
@@ -14,7 +22,7 @@
   }
 
   .title {
-    margin-bottom: 0.2rem;
+    margin-right: 0.6rem;
   }
 
   .subtitle {
@@ -42,4 +50,12 @@
   border-radius: 4px;
   box-shadow: 0 0 0.5rem var(--border-color);
   margin-left: 3rem;
+  display: flex;
+  align-items: center;
+}
+
+.eventIcon {
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-right: 1rem;
 }
