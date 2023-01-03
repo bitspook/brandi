@@ -2,6 +2,7 @@ import createStore from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { apiUrl } from './config';
 
+// From: https://docs.github.com/en/developers/webhooks-and-events/events/github-event-types
 export enum GithubEventType {
   CommitCommentEvent = 'CommitCommentEvent',
   CreateEvent = 'CreateEvent',

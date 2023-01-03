@@ -1,19 +1,31 @@
 import * as s from './styles.module.scss';
-import { formatRelative } from 'date-fns';
 import { GithubEvent } from '../../store';
+import format from 'date-fns/format';
+import formatRelative from 'date-fns/formatRelative';
 
 export default ({ event }: { event: GithubEvent }) => {
+  const body = JSON.stringify(event.payload, null, '  ');
+
   return (
     <section className={s.event}>
-      <header className={s.eventTitle}>
+      <header>
         <img className={s.avatar} src={event.actor.avatar_url} />
-        <a href={event.actor.url}>@{event.actor.display_login}</a>
-        &nbsp;
-        {event.payload.action} to &nbsp;
-        <a href={event.repo.url}>{event.repo.name}</a>
-        &nbsp; {formatRelative(event.created_at, new Date())}
+
+        <div className={s.eventTitle}>
+          <div className={s.title}>
+            <a href={event.actor.url}>@{event.actor.display_login}</a>
+            &nbsp;did something in&nbsp;
+            <a href={event.repo.url}>{event.repo.name}</a>
+          </div>
+          <div className={s.subtitle} title={format(event.created_at, 'PPpp')}>
+            {formatRelative(event.created_at, new Date())}
+          </div>
+        </div>
       </header>
-      <article className={s.eventBody}>Some really awesome code.</article>
+
+      <article className={s.eventBody} title={body}>
+        {body.substring(0, 300)}...
+      </article>
     </section>
   );
 };
