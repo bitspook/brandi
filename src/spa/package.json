@@ -23,6 +23,7 @@
     "typescript-language-server": "^2.2.0"
   },
   "dependencies": {
+    "date-fns": "^2.29.3",
     "immer": "^9.0.17",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

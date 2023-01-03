@@ -1,0 +1,45 @@
+.event {
+  width: 100%;
+  max-width: 60rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+}
+
+.eventTitle {
+  a {
+    text-decoration: none;
+    font-weight: bold;
+    color: inherit;
+  }
+
+  .title {
+    margin-bottom: 0.2rem;
+  }
+
+  .subtitle {
+    color: var(--dim-text-color);
+    font-size: 0.8rem;
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
+}
+
+.avatar {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: var(--border-color);
+  margin-right: 1rem;
+}
+
+.eventBody {
+  border: 1px solid var(--border-color);
+  padding: 1rem;
+  border-radius: 4px;
+  box-shadow: 0 0 0.5rem var(--border-color);
+  margin-left: 3rem;
+}

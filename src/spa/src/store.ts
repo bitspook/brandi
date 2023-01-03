@@ -2,9 +2,29 @@ import createStore from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { apiUrl } from './config';
 
-interface GithubEvent {
+export enum GithubEventType {
+  CommitCommentEvent = 'CommitCommentEvent',
+  CreateEvent = 'CreateEvent',
+  DeleteEvent = 'DeleteEvent',
+  ForkEvent = 'ForkEvent',
+  GollumEvent = 'GollumEvent',
+  IssueCommentEvent = 'IssueCommentEvent',
+  IssuesEvent = 'IssuesEvent',
+  MemberEvent = 'MemberEvent',
+  PublicEvent = 'PublicEvent',
+  PullRequestEvent = 'PullRequestEvent',
+  PullRequestReviewEvent = 'PullRequestReviewEvent',
+  PullRequestReviewCommentEvent = 'PullRequestReviewCommentEvent',
+  PullRequestReviewThreadEvent = 'PullRequestReviewThreadEvent',
+  PushEvent = 'PushEvent',
+  ReleaseEvent = 'ReleaseEvent',
+  SponsorshipEvent = 'SponsorshipEvent',
+  WatchEvent = 'WatchEvent'
+}
+
+export interface GithubEvent {
   id: string;
-  type: string;
+  type: GithubEventType;
   actor: {
     id: number;
     login: string;
@@ -24,11 +44,11 @@ interface GithubEvent {
     url: string;
   };
   payload: any;
-  created_at: string;
+  created_at: Date;
   [x: string]: any;
 }
 
-interface AppState {
+export interface AppState {
   github: {
     events: GithubEvent[];
   };
@@ -45,7 +65,10 @@ export default createStore<AppState>()(
         const events = await fetch(apiUrl).then((r) => r.json());
 
         set((state) => {
-          state.github.events = events.map((e: any) => e.payload);
+          state.github.events = events.map((e: any) => ({
+            ...e.payload,
+            created_at: new Date(e.payload.created_at)
+          }));
         });
       }
     };
